@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# env / secrets
+.env
+.env.local
+**/.env
+**/.env.local
+
+# build output
+backend/dist/
+frontend/.next/
+frontend/out/
+
+# misc
+.DS_Store
+*.log
+*.tsbuildinfo
