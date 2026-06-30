@@ -46,8 +46,8 @@ export default function RegisterPage() {
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground text-2xl">
             ₹
           </div>
-          <CardTitle className="text-2xl">Create account</CardTitle>
-          <CardDescription>Start tracking your expenses</CardDescription>
+          <CardTitle className="text-3xl">Create account</CardTitle>
+          <CardDescription className="text-base">Start tracking your money</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -63,7 +63,7 @@ export default function RegisterPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" disabled={busy}>
+            <Button type="submit" className="h-14 w-full text-lg font-bold" disabled={busy}>
               {busy ? 'Creating…' : 'Register'}
             </Button>
           </form>

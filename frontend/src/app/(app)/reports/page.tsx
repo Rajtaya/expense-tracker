@@ -55,7 +55,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Reports</h1>
+        <h1 className="text-3xl font-bold">Reports</h1>
         <Select
           value={preset}
           onValueChange={(v) => setPreset(v ?? 'year')}

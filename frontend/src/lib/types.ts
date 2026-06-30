@@ -2,10 +2,15 @@ export type PaymentMethod = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER' | 'OTHER';
 
 export type TxType = 'EXPENSE' | 'GIVEN' | 'RECEIVED';
 
-export const TX_TYPES: { value: TxType; label: string; personLabel: string }[] = [
-  { value: 'EXPENSE', label: 'Expense', personLabel: 'Person' },
-  { value: 'GIVEN', label: 'Money Given', personLabel: 'Given to' },
-  { value: 'RECEIVED', label: 'Money Received', personLabel: 'Received from' },
+export const TX_TYPES: {
+  value: TxType;
+  label: string;
+  personLabel: string;
+  dir: 'in' | 'out';
+}[] = [
+  { value: 'EXPENSE', label: 'Spent', personLabel: 'Paid to (optional)', dir: 'out' },
+  { value: 'GIVEN', label: 'Gave', personLabel: 'Gave to', dir: 'out' },
+  { value: 'RECEIVED', label: 'Got', personLabel: 'Got from', dir: 'in' },
 ];
 
 export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
