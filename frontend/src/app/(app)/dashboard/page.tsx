@@ -27,11 +27,17 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Stat cards */}
+      {/* Spending stat cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Today" value={s?.today} loading={summary.isLoading} accent />
-        <Stat label="This Month" value={s?.thisMonth} loading={summary.isLoading} />
-        <Stat label="This Year" value={s?.thisYear} loading={summary.isLoading} />
+        <Stat label="Spent Today" value={s?.today} loading={summary.isLoading} accent />
+        <Stat label="Spent This Month" value={s?.thisMonth} loading={summary.isLoading} />
+        <Stat label="Spent This Year" value={s?.thisYear} loading={summary.isLoading} />
+      </div>
+
+      {/* Money given / received */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Stat label="Money Given (this month)" value={s?.givenThisMonth} loading={summary.isLoading} tone="out" />
+        <Stat label="Money Received (this month)" value={s?.receivedThisMonth} loading={summary.isLoading} tone="in" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -99,12 +105,15 @@ function Stat({
   value,
   loading,
   accent,
+  tone,
 }: {
   label: string;
   value?: number;
   loading?: boolean;
   accent?: boolean;
+  tone?: 'in' | 'out';
 }) {
+  const toneClass = tone === 'in' ? 'text-green-600' : tone === 'out' ? 'text-red-600' : '';
   return (
     <Card className={accent ? 'border-primary/30 bg-primary/5' : undefined}>
       <CardContent className="pt-6">
@@ -112,7 +121,7 @@ function Stat({
         {loading ? (
           <Skeleton className="mt-2 h-8 w-24" />
         ) : (
-          <p className="mt-1 text-3xl font-bold">{formatMoney(value ?? 0)}</p>
+          <p className={`mt-1 text-3xl font-bold ${toneClass}`}>{formatMoney(value ?? 0)}</p>
         )}
       </CardContent>
     </Card>

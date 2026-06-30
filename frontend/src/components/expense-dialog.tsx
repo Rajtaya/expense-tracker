@@ -25,12 +25,14 @@ import {
 } from '@/components/ui/select';
 import { todayISO } from '@/lib/format';
 import { useCategories, useCreateExpense, useUpdateExpense } from '@/lib/hooks';
-import { Expense, PAYMENT_METHODS, PaymentMethod } from '@/lib/types';
+import { Expense, PAYMENT_METHODS, PaymentMethod, TX_TYPES, TxType } from '@/lib/types';
 
 const NONE = '__none__';
 
 const schema = z.object({
+  type: z.enum(['EXPENSE', 'GIVEN', 'RECEIVED']),
   amount: z.number({ message: 'Enter an amount' }).positive('Amount must be greater than 0'),
+  person: z.string().max(120).optional(),
   categoryId: z.string(),
   description: z.string().max(500).optional(),
   paymentMethod: z.enum(['CASH', 'UPI', 'CARD', 'BANK_TRANSFER', 'OTHER']),
@@ -62,11 +64,14 @@ export function ExpenseDialog({
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      type: 'EXPENSE',
       amount: undefined as unknown as number,
+      person: '',
       categoryId: NONE,
       description: '',
       paymentMethod: 'CASH',
@@ -74,11 +79,16 @@ export function ExpenseDialog({
     },
   });
 
+  const currentType = watch('type');
+  const personLabel = TX_TYPES.find((t) => t.value === currentType)?.personLabel ?? 'Person';
+
   // Populate when opening (for both add and edit).
   useEffect(() => {
     if (!open) return;
     reset({
+      type: (expense?.type ?? 'EXPENSE') as TxType,
       amount: expense ? Number(expense.amount) : (undefined as unknown as number),
+      person: expense?.person ?? '',
       categoryId: expense?.categoryId ?? NONE,
       description: expense?.description ?? '',
       paymentMethod: (expense?.paymentMethod ?? 'CASH') as PaymentMethod,
@@ -88,7 +98,9 @@ export function ExpenseDialog({
 
   const onSubmit = async (values: FormValues) => {
     const payload = {
+      type: values.type,
       amount: values.amount,
+      person: values.person?.trim() || null,
       categoryId: values.categoryId === NONE ? null : values.categoryId,
       description: values.description?.trim() || null,
       paymentMethod: values.paymentMethod,
@@ -112,6 +124,32 @@ export function ExpenseDialog({
           <DialogTitle>{isEdit ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Type</Label>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  items={TX_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TX_TYPES.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="amount">Amount (₹)</Label>
             <Input
@@ -169,6 +207,11 @@ export function ExpenseDialog({
                 )}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="person">{personLabel} (optional)</Label>
+            <Input id="person" placeholder="Name" {...register('person')} />
           </div>
 
           <div className="space-y-1.5">

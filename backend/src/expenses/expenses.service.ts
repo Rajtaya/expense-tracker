@@ -21,6 +21,8 @@ export class ExpensesService {
       data: {
         userId,
         amount: dto.amount,
+        type: dto.type ?? 'EXPENSE',
+        person: dto.person ?? null,
         categoryId: dto.categoryId ?? null,
         description: dto.description ?? null,
         paymentMethod: dto.paymentMethod ?? 'CASH',
@@ -34,6 +36,7 @@ export class ExpensesService {
 
   async findAll(userId: string, q: QueryExpenseDto) {
     const where: Prisma.ExpenseWhereInput = { userId };
+    if (q.type) where.type = q.type;
     if (q.from || q.to) {
       where.expenseDate = {
         ...(q.from ? { gte: new Date(q.from) } : {}),
@@ -71,6 +74,8 @@ export class ExpensesService {
       where: { id },
       data: {
         ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+        ...(dto.type !== undefined ? { type: dto.type } : {}),
+        ...(dto.person !== undefined ? { person: dto.person } : {}),
         ...(dto.categoryId !== undefined ? { categoryId: dto.categoryId } : {}),
         ...(dto.description !== undefined ? { description: dto.description } : {}),
         ...(dto.paymentMethod !== undefined ? { paymentMethod: dto.paymentMethod } : {}),

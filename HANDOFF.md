@@ -19,6 +19,8 @@ dashboard (today/month/year), reports with charts, search/filter, CSV export.
 | DB schema + migration + 14 seeded categories | ✅ Applied to local Postgres |
 | Frontend (login/register, dashboard, expenses, reports) | ✅ Done + verified in browser |
 | Add/edit/delete, search, filters, CSV export, charts | ✅ Working |
+| Money Given / Received tracking (type + person) | ✅ Working |
+| Installable PWA + mobile-responsive view | ✅ Working |
 | Receipt upload, PDF/Excel export, budgeting, Google login | ⛔ Pending (roadmap) |
 | Deploy / git repo | ⛔ Pending |
 
@@ -61,7 +63,7 @@ If the DB is ever reset: `cd backend && npx prisma migrate deploy && npx ts-node
 ## Architecture
 
 **Backend** (`backend/src/`)
-- `prisma/` — `PrismaService` (global module). Schema: `User`, `Category`, `Expense` + `PaymentMethod` enum (CASH/UPI/CARD/BANK_TRANSFER/OTHER). `prisma/seed.ts` seeds 14 categories (emoji+color).
+- `prisma/` — `PrismaService` (global module). Schema: `User`, `Category`, `Expense` + `PaymentMethod` enum (CASH/UPI/CARD/BANK_TRANSFER/OTHER) + `TxType` enum (EXPENSE/GIVEN/RECEIVED). `Expense` also has `type` (default EXPENSE) and `person` (who money was given to / received from). `prisma/seed.ts` seeds 14 categories (emoji+color).
 - `auth/` — register/login/me, JWT (passport-jwt), bcrypt, `@CurrentUser()` decorator, `JwtAuthGuard`.
 - `categories/` — list.
 - `expenses/` — CRUD, user-scoped, filters (from/to/categoryId/paymentMethod/search/page/limit); Decimal amounts serialized to numbers.

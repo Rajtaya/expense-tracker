@@ -1,4 +1,4 @@
-import { PaymentMethod } from '@prisma/client';
+import { PaymentMethod, TxType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsDateString,
@@ -17,6 +17,15 @@ export class UpdateExpenseDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
   amount?: number;
+
+  @IsOptional()
+  @IsEnum(TxType)
+  type?: TxType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  person?: string;
 
   @IsOptional()
   @IsUUID()

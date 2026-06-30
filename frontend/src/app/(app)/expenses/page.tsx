@@ -23,11 +23,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { formatDate, formatMoney } from '@/lib/format';
 import { ExpenseFilters, useCategories, useDeleteExpense, useExpenses } from '@/lib/hooks';
-import { Expense, PAYMENT_METHODS, PaymentMethod } from '@/lib/types';
+import { Expense, PAYMENT_METHODS, PaymentMethod, TX_TYPES, TxType } from '@/lib/types';
 
 const ALL = '__all__';
+
+const TYPE_BADGE: Record<TxType, { label: string; cls: string }> = {
+  EXPENSE: { label: 'Expense', cls: 'bg-slate-100 text-slate-700' },
+  GIVEN: { label: 'Given', cls: 'bg-red-100 text-red-700' },
+  RECEIVED: { label: 'Received', cls: 'bg-green-100 text-green-700' },
+};
 
 function rangeFor(preset: string): { from?: string; to?: string } {
   const now = new Date();
@@ -53,6 +60,7 @@ function rangeFor(preset: string): { from?: string; to?: string } {
 export default function ExpensesPage() {
   const [search, setSearch] = useState('');
   const [preset, setPreset] = useState('all');
+  const [type, setType] = useState<string>(ALL);
   const [categoryId, setCategoryId] = useState<string>(ALL);
   const [paymentMethod, setPaymentMethod] = useState<string>(ALL);
 
@@ -63,12 +71,13 @@ export default function ExpensesPage() {
     const r = rangeFor(preset);
     return {
       ...r,
+      type: type === ALL ? undefined : (type as TxType),
       search: search || undefined,
       categoryId: categoryId === ALL ? undefined : categoryId,
       paymentMethod: paymentMethod === ALL ? undefined : (paymentMethod as PaymentMethod),
       limit: 200,
     };
-  }, [preset, search, categoryId, paymentMethod]);
+  }, [preset, type, search, categoryId, paymentMethod]);
 
   const expenses = useExpenses(filters);
   const rows = expenses.data?.data ?? [];
@@ -86,10 +95,12 @@ export default function ExpensesPage() {
 
   const exportCsv = () => {
     if (!rows.length) return toast.error('Nothing to export');
-    const header = ['Date', 'Category', 'Description', 'Payment', 'Amount'];
+    const header = ['Date', 'Type', 'Person', 'Category', 'Description', 'Payment', 'Amount'];
     const lines = rows.map((e) =>
       [
         e.expenseDate.slice(0, 10),
+        e.type,
+        (e.person ?? '').replace(/"/g, '""'),
         e.category?.name ?? '',
         (e.description ?? '').replace(/"/g, '""'),
         e.paymentMethod,
@@ -157,6 +168,26 @@ export default function ExpensesPage() {
             </SelectContent>
           </Select>
           <Select
+            value={type}
+            onValueChange={(v) => setType(v ?? ALL)}
+            items={[
+              { value: ALL, label: 'All types' },
+              ...TX_TYPES.map((t) => ({ value: t.value, label: t.label })),
+            ]}
+          >
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All types</SelectItem>
+              {TX_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
             value={categoryId}
             onValueChange={(v) => setCategoryId(v ?? ALL)}
             items={[
@@ -215,6 +246,7 @@ export default function ExpensesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Payment</TableHead>
@@ -225,7 +257,7 @@ export default function ExpensesPage() {
             <TableBody>
               {expenses.isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     Loading…
                   </TableCell>
                 </TableRow>
@@ -233,12 +265,25 @@ export default function ExpensesPage() {
                 rows.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="whitespace-nowrap">{formatDate(e.expenseDate)}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={TYPE_BADGE[e.type].cls}>
+                        {TYPE_BADGE[e.type].label}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {e.category ? `${e.category.icon ?? ''} ${e.category.name}` : '—'}
                     </TableCell>
-                    <TableCell className="max-w-[220px] truncate">{e.description || '—'}</TableCell>
+                    <TableCell className="max-w-[220px] truncate">
+                      {e.description || '—'}
+                      {e.person ? <span className="text-muted-foreground"> · {e.person}</span> : null}
+                    </TableCell>
                     <TableCell>{PAYMENT_METHODS.find((p) => p.value === e.paymentMethod)?.label}</TableCell>
-                    <TableCell className="text-right font-medium">{formatMoney(e.amount)}</TableCell>
+                    <TableCell
+                      className={`text-right font-medium ${e.type === 'RECEIVED' ? 'text-green-600' : e.type === 'GIVEN' ? 'text-red-600' : ''}`}
+                    >
+                      {e.type === 'RECEIVED' ? '+' : ''}
+                      {formatMoney(e.amount)}
+                    </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
                         <ExpenseDialog
@@ -263,7 +308,7 @@ export default function ExpensesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     No expenses found.
                   </TableCell>
                 </TableRow>

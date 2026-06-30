@@ -1,4 +1,4 @@
-import { PaymentMethod } from '@prisma/client';
+import { PaymentMethod, TxType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsDateString,
@@ -11,6 +11,10 @@ import {
 } from 'class-validator';
 
 export class QueryExpenseDto {
+  @IsOptional()
+  @IsEnum(TxType)
+  type?: TxType;
+
   @IsOptional()
   @IsDateString()
   from?: string;

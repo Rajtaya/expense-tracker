@@ -29,19 +29,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-3 sm:px-4">
+          <div className="flex items-center gap-2 sm:gap-6">
             <span className="flex items-center gap-1.5 font-semibold">
               <span className="flex size-6 items-center justify-center rounded-md bg-primary text-sm text-primary-foreground">₹</span>
-              ExpenseTracker
+              <span className="hidden sm:inline">ExpenseTracker</span>
             </span>
-            <nav className="flex gap-1">
+            <nav className="flex gap-0.5 sm:gap-1">
               {NAV.map((n) => (
                 <Link
                   key={n.href}
                   href={n.href}
                   className={cn(
-                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    'rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors sm:px-3',
                     pathname === n.href
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',

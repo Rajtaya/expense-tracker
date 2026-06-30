@@ -1,5 +1,13 @@
 export type PaymentMethod = 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER' | 'OTHER';
 
+export type TxType = 'EXPENSE' | 'GIVEN' | 'RECEIVED';
+
+export const TX_TYPES: { value: TxType; label: string; personLabel: string }[] = [
+  { value: 'EXPENSE', label: 'Expense', personLabel: 'Person' },
+  { value: 'GIVEN', label: 'Money Given', personLabel: 'Given to' },
+  { value: 'RECEIVED', label: 'Money Received', personLabel: 'Received from' },
+];
+
 export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'CASH', label: 'Cash' },
   { value: 'UPI', label: 'UPI' },
@@ -24,6 +32,8 @@ export interface Category {
 export interface Expense {
   id: string;
   amount: number;
+  type: TxType;
+  person: string | null;
   description: string | null;
   paymentMethod: PaymentMethod;
   expenseDate: string;
@@ -53,6 +63,8 @@ export interface Summary {
   thisMonth: number;
   thisYear: number;
   monthCount: number;
+  givenThisMonth: number;
+  receivedThisMonth: number;
   byCategory: CategoryTotal[];
 }
 

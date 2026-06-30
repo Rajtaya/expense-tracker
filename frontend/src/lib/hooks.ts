@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './api';
-import { Category, CategoryTotal, Expense, Paginated, PaymentMethod, Summary, TrendPoint } from './types';
+import { Category, CategoryTotal, Expense, Paginated, PaymentMethod, Summary, TrendPoint, TxType } from './types';
 
 export interface ExpenseFilters {
+  type?: TxType;
   from?: string;
   to?: string;
   categoryId?: string;
@@ -14,6 +15,8 @@ export interface ExpenseFilters {
 
 export interface ExpenseInput {
   amount: number;
+  type?: TxType;
+  person?: string | null;
   categoryId?: string | null;
   description?: string | null;
   paymentMethod: PaymentMethod;

@@ -36,10 +36,18 @@ enum PaymentMethod {
   OTHER
 }
 
+enum TxType {
+  EXPENSE // money spent
+  GIVEN // money given to a person (out)
+  RECEIVED // money received from a person (in)
+}
+
 model Expense {
   id            String        @id @default(uuid())
   userId        String
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          TxType        @default(EXPENSE)
+  person        String? // who money was given to / received from
   categoryId    String?
   category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   amount        Decimal       @db.Decimal(12, 2)
@@ -52,4 +60,5 @@ model Expense {
 
   @@index([userId])
   @@index([expenseDate])
+  @@index([type])
 }

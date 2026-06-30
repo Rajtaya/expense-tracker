@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TxType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface CategoryTotal {
@@ -41,20 +41,22 @@ export class ReportsService {
     const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startYear = new Date(now.getFullYear(), 0, 1);
 
-    const sumSince = async (gte: Date) => {
+    const sumSince = async (gte: Date, type: TxType = 'EXPENSE') => {
       const r = await this.prisma.expense.aggregate({
         _sum: { amount: true },
         _count: true,
-        where: { userId, expenseDate: { gte } },
+        where: { userId, type, expenseDate: { gte } },
       });
       return { total: Number(r._sum.amount ?? 0), count: r._count };
     };
 
-    const [today, month, year, byCategory] = await Promise.all([
+    const [today, month, year, given, received, byCategory] = await Promise.all([
       sumSince(startToday),
       sumSince(startMonth),
       sumSince(startYear),
-      this.breakdown(userId, { expenseDate: { gte: startMonth } }),
+      sumSince(startMonth, 'GIVEN'),
+      sumSince(startMonth, 'RECEIVED'),
+      this.breakdown(userId, { type: 'EXPENSE', expenseDate: { gte: startMonth } }),
     ]);
 
     return {
@@ -62,12 +64,14 @@ export class ReportsService {
       thisMonth: month.total,
       thisYear: year.total,
       monthCount: month.count,
+      givenThisMonth: given.total,
+      receivedThisMonth: received.total,
       byCategory,
     };
   }
 
   byCategory(userId: string, from?: string, to?: string) {
-    const where: Prisma.ExpenseWhereInput = {};
+    const where: Prisma.ExpenseWhereInput = { type: 'EXPENSE' };
     if (from || to) {
       where.expenseDate = {
         ...(from ? { gte: new Date(from) } : {}),
@@ -80,7 +84,7 @@ export class ReportsService {
   async trend(userId: string, from?: string, to?: string, groupBy: 'day' | 'month' = 'month') {
     const trunc = groupBy === 'day' ? 'day' : 'month';
     const fmt = groupBy === 'day' ? 'YYYY-MM-DD' : 'YYYY-MM';
-    const conditions: Prisma.Sql[] = [Prisma.sql`"userId" = ${userId}`];
+    const conditions: Prisma.Sql[] = [Prisma.sql`"userId" = ${userId}`, Prisma.sql`"type" = 'EXPENSE'`];
     if (from) conditions.push(Prisma.sql`"expenseDate" >= ${new Date(from)}`);
     if (to) conditions.push(Prisma.sql`"expenseDate" <= ${new Date(to)}`);
     const whereSql = Prisma.join(conditions, ' AND ');
