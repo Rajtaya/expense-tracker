@@ -7,7 +7,10 @@ dashboard (today/month/year), reports with charts, search/filter, CSV export.
 
 - Root: `/Users/aarya/expense-tracker` — monorepo: `backend/`, `frontend/`, `docker-compose.yml`
 - **Stack:** NestJS 11 + Prisma 6 + PostgreSQL + JWT · Next.js 16 + TS + Tailwind v4 + shadcn/ui + React Query + Recharts + React Hook Form
-- **Status:** ✅ Phase-1 MVP built and verified end-to-end in the browser. Not yet deployed / no git repo.
+- **Status:** ✅ Phase-1 MVP built, verified, and **LIVE on Railway**.
+- **Live app:** https://expensetracker-app.up.railway.app  (the exact `expensetracker.up.railway.app` was already taken globally)
+- **Repo:** public — github.com/Rajtaya/expense-tracker
+- **Deploy:** Railway, 3 services (Postgres + backend + frontend). Frontend proxies `/api/*` to the backend (single domain, no CORS). Built via per-service Dockerfile (`RAILWAY_DOCKERFILE_PATH`); redeploy with `railway up --service backend|frontend --ci` from the repo root. Seed prod DB with the Postgres `DATABASE_PUBLIC_URL`.
 
 ---
 
