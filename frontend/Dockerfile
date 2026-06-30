@@ -12,6 +12,8 @@ COPY frontend/ ./
 # Both must be set at BUILD time: Next bakes rewrites into the build output.
 ENV NEXT_PUBLIC_API_URL=/api
 ENV BACKEND_ORIGIN=https://backend-production-7ee1.up.railway.app
+# Cloudflare Turnstile site key (public). Default = test key (always passes).
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 RUN npm run build
 
 ENV NODE_ENV=production

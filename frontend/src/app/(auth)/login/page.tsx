@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TurnstileBox } from '@/components/turnstile-box';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
@@ -16,6 +17,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   useEffect(() => {
     if (!loading && user) router.replace('/dashboard');
@@ -25,10 +28,12 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await login(email, password);
+      await login(email, password, captcha ?? undefined);
       router.replace('/dashboard');
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Login failed');
+      setCaptcha(null);
+      setCaptchaKey((k) => k + 1);
     } finally {
       setBusy(false);
     }
@@ -54,7 +59,8 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="h-14 w-full text-lg font-bold" disabled={busy}>
+            <TurnstileBox key={captchaKey} onToken={setCaptcha} />
+            <Button type="submit" className="h-14 w-full text-lg font-bold" disabled={busy || !captcha}>
               {busy ? 'Logging in…' : 'Login'}
             </Button>
           </form>

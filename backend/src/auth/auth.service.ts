@@ -5,12 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from './auth-user.type';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { TurnstileService } from './turnstile.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private turnstile: TurnstileService,
   ) {}
 
   private sign(user: AuthUser): string {
@@ -18,6 +20,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    await this.turnstile.verify(dto.turnstileToken);
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (exists) throw new ConflictException('Email already registered');
     const password = await bcrypt.hash(dto.password, 10);
@@ -29,6 +32,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    await this.turnstile.verify(dto.turnstileToken);
     const found = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
     if (!found) throw new UnauthorizedException('Invalid email or password');
     const ok = await bcrypt.compare(dto.password, found.password);
