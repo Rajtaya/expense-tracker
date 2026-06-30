@@ -10,7 +10,7 @@ dashboard (today/month/year), reports with charts, search/filter, CSV export.
 - **Status:** ✅ Phase-1 MVP built, verified, and **LIVE on Railway**.
 - **Live app:** https://expensetracker-app.up.railway.app  (the exact `expensetracker.up.railway.app` was already taken globally)
 - **Repo:** public — github.com/Rajtaya/expense-tracker
-- **Deploy:** Railway, 3 services (Postgres + backend + frontend). Frontend proxies `/api/*` to the backend (single domain, no CORS). Built via per-service Dockerfile (`RAILWAY_DOCKERFILE_PATH`); redeploy with `railway up --service backend|frontend --ci` from the repo root. Seed prod DB with the Postgres `DATABASE_PUBLIC_URL`.
+- **Deploy:** Railway, 3 services (Postgres + backend + frontend). Frontend proxies `/api/*` to the backend (single domain, no CORS). Built via per-service Dockerfile (`RAILWAY_DOCKERFILE_PATH`). **Auto-deploy on push:** both services are connected to GitHub `main`, so `git push` rebuilds & redeploys both automatically. Manual: `railway up --service backend|frontend --ci`. Seed prod DB with the Postgres `DATABASE_PUBLIC_URL`.
 
 ---
 
